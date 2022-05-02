@@ -1,0 +1,36 @@
+{
+  "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
+  "version": "0.2",
+  "language": "en",
+  "caseSensitive": false,
+  "ignorePaths": ["target"],
+  "dictionaries": [
+    "en_US",
+    "public-licenses",
+    "softwareTerms",
+    "filetypes",
+    "misc"
+  ],
+  "words": [
+    "eximium",
+    "makurosu",
+    "mecha",
+    "riscv",
+    "rlib",
+    "rustfmt",
+    "clippy",
+    "rustdoc",
+    "pipechain",
+    "insta",
+    "punct",
+    "trybuild",
+    "codegen",
+    "metavariables",
+    "idents",
+    "struct",
+    "delim",
+    "builtins",
+    "subpat",
+    "elems"
+  ]
+}

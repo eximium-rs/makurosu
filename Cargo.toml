@@ -1,0 +1,31 @@
+[package]
+name = "makurosu"
+version = "0.1.0"
+authors = ["Yugo <yugo@logical.work>"]
+edition = "2021"
+homepage = "https://github.com/eximium-rs/makurosu"
+license = "BSD-2-Clause"
+readme = "README.md"
+repository = "https://github.com/eximium-rs/makurosu.git"
+description = """
+A mecha armor for your macros.
+"""
+
+[lib]
+proc-macro = true
+
+[dependencies]
+heck = { version = "0.4.0" }
+once_cell = { version = "1.10.0" }
+proc-macro-error = { version = "1.0.4" }
+proc-macro2 = { version = "1.0.37" }
+quote = { version = "1.0.18" }
+syn = { version = "1.0.91", features = ["extra-traits", "full", "parsing"] }
+
+[dev-dependencies]
+insta = { version = "1.14.0" }
+trybuild = { version = "1.0.59" }
+
+[features]
+default = ["builtins"]
+builtins = []
