@@ -46,7 +46,7 @@ impl Parse for If {
             if_token: input.parse()?,
             if_expr: input.parse()?,
             body: Box::new(input.parse()?),
-            otherwise: if Otherwise::peek(input) {
+            otherwise: if Otherwise::peek_start(input) {
                 Some(input.parse()?)
             } else {
                 None
@@ -77,7 +77,7 @@ impl Parse for ElseIf {
             if_token: input.parse()?,
             if_expr: input.parse()?,
             body: Box::new(input.parse()?),
-            otherwise: if Otherwise::peek(input) {
+            otherwise: if Otherwise::peek_start(input) {
                 Some(input.parse()?)
             } else {
                 None
@@ -111,7 +111,7 @@ pub enum Otherwise {
 }
 
 impl Otherwise {
-    pub fn peek(input: ParseStream) -> bool {
+    pub fn peek_start(input: ParseStream) -> bool {
         input.peek(Token!(else))
     }
 }

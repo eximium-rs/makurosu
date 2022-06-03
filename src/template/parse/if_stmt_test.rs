@@ -1,48 +1,50 @@
-mod peek_start_test {
-    use crate::template::parse::if_stmt::If;
-    use proc_macro2::TokenStream;
-    use syn::parse::{Parse, ParseStream};
+mod if_struct_test {
+    mod peek_start_test {
+        use crate::template::parse::if_stmt::If;
+        use proc_macro2::TokenStream;
+        use syn::parse::{Parse, ParseStream};
 
-    pub struct TestCase {
-        valid: bool
-    }
+        struct TestCase {
+            valid: bool
+        }
 
-    impl Parse for TestCase {
-        fn parse(input: ParseStream) -> syn::Result<Self> {
-            let valid = If::peek_start(input);
-            let _: TokenStream = input.parse()?;
-            Ok(TestCase { valid })
+        impl Parse for TestCase {
+            fn parse(input: ParseStream) -> syn::Result<Self> {
+                let valid = If::peek_start(input);
+                let _: TokenStream = input.parse()?;
+                Ok(TestCase { valid })
+            }
+        }
+
+        #[test]
+        fn when_stream_does_not_start_with_percent_if_it_returns_false() {
+            let case: TestCase = syn::parse_str("if true {}").unwrap();
+            assert!(!case.valid);
+        }
+
+        #[test]
+        fn when_stream_starts_with_percent_something_else_it_returns_false() {
+            let case: TestCase =
+                syn::parse_str("%somethingelse true {}").unwrap();
+            assert!(!case.valid);
+        }
+
+        #[test]
+        fn when_stream_does_start_with_percent_if_it_returns_true() {
+            let case: TestCase = syn::parse_str("%if true {}").unwrap();
+            assert!(case.valid);
         }
     }
 
-    #[test]
-    fn when_stream_does_not_start_with_percent_if_it_returns_false() {
-        let case: TestCase = syn::parse_str("if true {}").unwrap();
-        assert!(!case.valid);
-    }
+    mod parse_test {
+        use crate::template::parse::if_stmt::If;
+        use insta::assert_debug_snapshot;
 
-    #[test]
-    fn when_stream_starts_with_percent_something_else_it_returns_false() {
-        let case: TestCase = syn::parse_str("%somethingelse true {}").unwrap();
-        assert!(!case.valid);
-    }
-
-    #[test]
-    fn when_stream_does_start_with_percent_if_it_returns_true() {
-        let case: TestCase = syn::parse_str("%if true {}").unwrap();
-        assert!(case.valid);
-    }
-}
-
-mod parse_test {
-    use crate::template::parse::if_stmt::If;
-    use insta::assert_debug_snapshot;
-
-    #[test]
-    fn when_if_expr_is_an_expr() {
-        let if_stmt: If =
-            syn::parse_str("%if true { let _ = \"xyz\"; }").unwrap();
-        assert_debug_snapshot!(if_stmt, @r###"
+        #[test]
+        fn when_if_expr_is_an_expr() {
+            let if_stmt: If =
+                syn::parse_str("%if true { let _ = \"xyz\"; }").unwrap();
+            assert_debug_snapshot!(if_stmt, @r###"
         If {
             percent_token: Rem,
             if_token: If,
@@ -93,14 +95,15 @@ mod parse_test {
             otherwise: None,
         }
         "###);
-    }
+        }
 
-    #[test]
-    fn when_if_expr_is_a_pipechain() {
-        let if_stmt: If =
-            syn::parse_str("%if %{flag|default(false)} { let _ = \"xyz\"; }")
-                .unwrap();
-        assert_debug_snapshot!(if_stmt, @r###"
+        #[test]
+        fn when_if_expr_is_a_pipechain() {
+            let if_stmt: If = syn::parse_str(
+                "%if %{flag|default(false)} { let _ = \"xyz\"; }"
+            )
+            .unwrap();
+            assert_debug_snapshot!(if_stmt, @r###"
         If {
             percent_token: Rem,
             if_token: If,
@@ -189,13 +192,13 @@ mod parse_test {
             otherwise: None,
         }
         "###);
-    }
+        }
 
-    #[test]
-    fn when_if_stmt_has_a_else_stmt() {
-        let if_stmt: If =
-            syn::parse_str("%if true {} else { let _ = \"qaz\";}").unwrap();
-        assert_debug_snapshot!(if_stmt, @r###"
+        #[test]
+        fn when_if_stmt_has_a_else_stmt() {
+            let if_stmt: If =
+                syn::parse_str("%if true {} else { let _ = \"qaz\";}").unwrap();
+            assert_debug_snapshot!(if_stmt, @r###"
         If {
             percent_token: Rem,
             if_token: If,
@@ -256,16 +259,16 @@ mod parse_test {
             ),
         }
         "###);
-    }
+        }
 
-    #[test]
-    fn when_if_stmts_has_a_else_if_and_else_stmts() {
-        let if_stmt: If = syn::parse_str(
-            "%if true {} else if false { let _ = \"qaz\"; } else { let _ = \
-             \"wsx\"; }"
-        )
-        .unwrap();
-        assert_debug_snapshot!(if_stmt, @r###"
+        #[test]
+        fn when_if_stmts_has_a_else_if_and_else_stmts() {
+            let if_stmt: If = syn::parse_str(
+                "%if true {} else if false { let _ = \"qaz\"; } else { let _ \
+                 = \"wsx\"; }"
+            )
+            .unwrap();
+            assert_debug_snapshot!(if_stmt, @r###"
         If {
             percent_token: Rem,
             if_token: If,
@@ -378,15 +381,16 @@ mod parse_test {
             ),
         }
         "###);
-    }
+        }
 
-    #[test]
-    fn when_if_stmt_has_a_else_if_stmt_with_a_pipechain() {
-        let if_stmt: If = syn::parse_str(
-            "%if true {} else if %{flag|default(false)} { let _ = \"xyz\"; }"
-        )
-        .unwrap();
-        assert_debug_snapshot!(if_stmt, @r###"
+        #[test]
+        fn when_if_stmt_has_a_else_if_stmt_with_a_pipechain() {
+            let if_stmt: If = syn::parse_str(
+                "%if true {} else if %{flag|default(false)} { let _ = \
+                 \"xyz\"; }"
+            )
+            .unwrap();
+            assert_debug_snapshot!(if_stmt, @r###"
         If {
             percent_token: Rem,
             if_token: If,
@@ -499,5 +503,117 @@ mod parse_test {
             ),
         }
         "###);
+        }
+    }
+}
+
+mod else_if_struct_test {
+    mod peek_start_test {
+        use proc_macro2::TokenStream;
+        use syn::parse::{Parse, ParseStream};
+
+        use crate::template::parse::if_stmt::ElseIf;
+
+        struct TestCase {
+            valid: bool
+        }
+
+        impl Parse for TestCase {
+            fn parse(input: ParseStream) -> syn::Result<Self> {
+                let valid = ElseIf::peek_start(input);
+                let _: TokenStream = input.parse()?; // Consume stream.
+                Ok(Self { valid })
+            }
+        }
+
+        #[test]
+        fn when_input_does_not_start_with_else_if_it_returns_false() {
+            let case: TestCase = syn::parse_str("elseif").unwrap();
+            assert!(!case.valid);
+        }
+
+        #[test]
+        fn when_input_starts_with_else_but_no_if_it_returns_false() {
+            let case: TestCase = syn::parse_str("else").unwrap();
+            assert!(!case.valid);
+        }
+
+        #[test]
+        fn when_input_starts_with_else_if_it_returns_true() {
+            let case: TestCase = syn::parse_str("else if").unwrap();
+            assert!(case.valid);
+        }
+    }
+}
+
+mod else_struct_test {
+    mod peek_start_test {
+        use proc_macro2::TokenStream;
+        use syn::parse::{Parse, ParseStream};
+
+        use crate::template::parse::if_stmt::Else;
+
+        struct TestCase {
+            valid: bool
+        }
+
+        impl Parse for TestCase {
+            fn parse(input: ParseStream) -> syn::Result<Self> {
+                let valid = Else::peek_start(input);
+                let _: TokenStream = input.parse()?; // Consume stream.
+                Ok(Self { valid })
+            }
+        }
+
+        #[test]
+        fn when_input_does_not_start_with_else_it_returns_false() {
+            let case: TestCase = syn::parse_str("if {}").unwrap();
+            assert!(!case.valid);
+        }
+
+        #[test]
+        fn when_input_starts_with_else_but_no_brace_it_returns_false() {
+            let case: TestCase = syn::parse_str("else").unwrap();
+            assert!(!case.valid);
+        }
+
+        #[test]
+        fn when_input_starts_with_else_and_a_brace_it_returns_true() {
+            let case: TestCase = syn::parse_str("else {}").unwrap();
+            assert!(case.valid);
+        }
+    }
+}
+
+mod otherwise_test {
+    mod peek_start_test {
+        use proc_macro2::TokenStream;
+        use syn::parse::{Parse, ParseStream};
+
+        use crate::template::parse::if_stmt::Otherwise;
+
+        struct TestCase {
+            valid: bool
+        }
+
+        impl Parse for TestCase {
+            fn parse(input: ParseStream) -> syn::Result<Self> {
+                let valid = Otherwise::peek_start(input);
+                let _: TokenStream = input.parse()?; // Consume stream.
+                Ok(Self { valid })
+            }
+        }
+
+        #[test]
+        fn when_input_does_not_start_with_else_it_returns_false() {
+            let case: TestCase = syn::parse_str("if {}").unwrap();
+            assert!(!case.valid);
+        }
+
+        #[test]
+        fn when_input_starts_with_else_it_returns_true() {
+            let case: TestCase = syn::parse_str("else").unwrap();
+            assert!(case.valid);
+        }
     }
 }
